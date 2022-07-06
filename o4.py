@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from typing import Optional
 
 
@@ -12,9 +13,14 @@ def getMyPosition(histPrice: np.array):
     nInst, nDays = histPrice.shape
 
     posDelta: np.array = np.zeros(nInst)
+    priceEwm: np.array = (pd
+                          .DataFrame(histPrice)
+                          .ewm(span=5, axis=1)
+                          .mean()
+                          .to_numpy())
 
     if nDays > 1:
-        posDelta = np.sign(histPrice[:, -1] - histPrice[:, -2]) * 100_000_000
+        posDelta = histPrice[:, -1] - priceEwm[:, -1] * 100
 
     if prevPos is None:
         prevPos = np.zeros(nInst)
