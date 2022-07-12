@@ -7,7 +7,7 @@ nInst = 0
 nt = 0
 
 # Commission rate
-commRate = 0.0025 # was 0.0050
+commRate = 0.0025 # 0.0025
 
 # Dollar position limit (maximum absolute dollar value of any individual stock position)
 dlrPosLimit = 10000
@@ -17,8 +17,9 @@ timeOut=600
 def loadPrices(fn):
     global nt, nInst
     df=pd.read_csv(fn, sep='\s+', header=None, index_col=None)
-    nt, nInst = df.values.shape
-    return (df.values).T
+    values = df.values.T[:, :]
+    nInst, nt = values.shape
+    return values
 
 pricesFile="./prices.txt"
 prcAll = loadPrices(pricesFile)
@@ -64,6 +65,8 @@ def calcPL(prcHist):
         todayPLL.append(todayPL)
         value = cash + posValue
         ret = 0.0
+        print("====")
+        print(f"{deltaPos = }, {cash = }, {posValue = }")
         if (totDVolume > 0):
             ret = value / totDVolume
         print ("Day %d value: %.2lf todayPL: $%.2lf $-traded: %.0lf return: %.5lf" % (t,value, todayPL, totDVolume, ret))

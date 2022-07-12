@@ -13,14 +13,24 @@ def getMyPosition(histPrice: np.array):
     nInst, nDays = histPrice.shape
 
     posDelta: np.array = np.zeros(nInst)
-    priceEwm: np.array = (pd
+    priceEwm12: np.array = (pd
                           .DataFrame(histPrice)
-                          .ewm(span=5, axis=1)
+                          .ewm(span=12, axis=1)
                           .mean()
                           .to_numpy())
+    priceEwm26: np.array = (pd
+                          .DataFrame(histPrice)
+                          .ewm(span=26, axis=1)
+                          .mean()
+                          .to_numpy())
+    priceMACD: np.array = priceEwm12 - priceEwm26
+    priceIndicator: np.array = priceMACD > 0
 
-    if nDays > 1:
-        posDelta = histPrice[:, -1] - priceEwm[:, -1] * 100
+    # if nDays == 249:
+    #     posDelta[:] = -prevPos
+    if nDays > 2:
+        posDelta = (priceIndicator[:, -2] != priceIndicator[:, -1]) \
+                * (priceIndicator[:, -1] - .5) * 10
 
     if prevPos is None:
         prevPos = np.zeros(nInst)
